@@ -1,0 +1,24 @@
+{
+  "name": "codegalaxy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "scan": "node bin/scan.js",
+    "query": "node bin/query.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "lucide-react": "^1.16.0",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
+  }
+}
