@@ -92,30 +92,15 @@ export default function Home() {
     if (!queryResult || !queryResult.selectedFiles) return;
 
     const filesListStr = queryResult.selectedFiles
-      .map((f, idx) => `  ${idx + 1}. [${f.name}](file://${f.path}) - ${f.reason}`)
+      .map((f, idx) => `${idx + 1}. ${f.path} — ${f.shortReason || f.reason}`)
       .join('\n');
 
-    let promptText = '';
-    if (target === 'anti') {
-      promptText = `[ANTIGRAVITY INITIAL CONTEXT CONSTRAINTS]
-You are working on the task: "${queryText}".
-To prevent token waste and keep reasoning extremely accurate, ONLY read and modify these files:
+    const promptText = `Task: ${queryText}
+Read ONLY these files first:
 ${filesListStr}
 
-Do not scan the full repository unless explicitly asked. Avoid accessing other unselected files.`;
-    } else if (target === 'cline') {
-      promptText = `[CLINE CONTEXT RESTRICTION]
-TASK: "${queryText}"
-RECOMMENDED FILES FOR READ:
-${filesListStr}
-
-INSTRUCTIONS:
-You must strictly restrict your file read scope to these selected candidates. Do not do expensive broad search operations.`;
-    } else {
-      // Minimal context copy
-      const pathsOnly = queryResult.selectedFiles.map(f => f.path).join(', ');
-      promptText = `Task: "${queryText}"\nActive Context: [${pathsOnly}]`;
-    }
+Do not scan the full repo unless these files are insufficient.
+After reading, explain whether more files are needed.`;
 
     navigator.clipboard.writeText(promptText);
     setCopySuccess(target);
@@ -125,8 +110,15 @@ You must strictly restrict your file read scope to these selected candidates. Do
   // Format generated markdown prompt preview
   const getPromptPreview = () => {
     if (!queryResult || !queryResult.selectedFiles) return '';
-    const list = queryResult.selectedFiles.map((f, i) => `  ${i + 1}. [${f.name}](file://${f.path}) - ${f.reason}`).join('\n');
-    return `Recommended files for AI to read:\n${list}\n\nTask: "${queryText}"\n\nInstructions:\nONLY read these files first. Do not scan the full repository unless necessary.`;
+    const list = queryResult.selectedFiles
+      .map((f, i) => `${i + 1}. ${f.path} — ${f.shortReason || f.reason}`)
+      .join('\n');
+    return `Task: ${queryText}
+Read ONLY these files first:
+${list}
+
+Do not scan the full repo unless these files are insufficient.
+After reading, explain whether more files are needed.`;
   };
 
   return (

@@ -23,26 +23,30 @@ async function run() {
     console.log(`Files not selected for this task: ${results.prunedCount} (${results.reductionPercent}%)`);
     console.log('================================================================');
 
-    console.log('\n📋 PREVIEW: What will be sent to AI (for semantic reranking):');
-    results.candidatesForAi.forEach((cand, idx) => {
-      console.log(`  ${idx + 1}. [${cand.path}]`);
-    });
-
-    console.log('\n🚀 Recommended files for AI to read:');
+    console.log('\n📋 Metadata reasoning fields preview (matchType & matchedTerms):');
     results.selectedFiles.forEach((file, idx) => {
-      console.log(`\n${idx + 1}. [${file.name}](file://${file.path})`);
-      console.log(`   💡 Reason: ${file.reason}`);
+      console.log(`  ${idx + 1}. [${file.path}]`);
+      console.log(`     - matchType: ${file.matchType}`);
+      console.log(`     - matchedTerms: [${(file.matchedTerms || []).join(', ')}]`);
+      if (file.dependencyFrom) {
+        console.log(`     - dependencyFrom: ${file.dependencyFrom}`);
+      }
     });
 
-    console.log('\n📝 COPY-PASTE PROMPT FOR ANTIGRAVITY OR CLINE:');
+    console.log('\n📝 CLEAN BOOTSTRAP PROMPT GENERATOR:');
     console.log('----------------------------------------------------------------');
-    const filesList = results.selectedFiles.map((f, i) => `  ${i + 1}. [${f.name}](file://${f.path}) - ${f.reason}`).join('\n');
-    const prompt = `You are working on the task: "${queryText}".
-To minimize token costs and avoid hallucination, ONLY read and edit these recommended files:
+    const filesList = results.selectedFiles
+      .map((f, i) => `${i + 1}. ${f.path} — ${f.shortReason}`)
+      .join('\n');
+
+    const cleanPrompt = `Task: ${queryText}
+Read ONLY these files first:
 ${filesList}
 
-Do not read other unselected files unless absolutely necessary.`;
-    console.log(prompt);
+Do not scan the full repo unless these files are insufficient.
+After reading, explain whether more files are needed.`;
+
+    console.log(cleanPrompt);
     console.log('----------------------------------------------------------------');
 
   } catch (err) {
